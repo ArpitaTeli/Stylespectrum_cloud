@@ -1,0 +1,49 @@
+
+version: 0.2
+
+phases:
+
+  install:
+    commands:
+      - echo "Checking Python version..."
+      - python3 --version
+      - echo "Checking project structure..."
+
+  pre_build:
+    commands:
+      - echo "Preparing StyleSpectrum backend..."
+      - ls -la Backend/
+      - test -f Backend/app.py
+      - test -f Backend/requirements.txt
+      - test -f appspec.yml
+      - test -f scripts/install_dependencies.sh
+      - test -f scripts/start_server.sh
+      - test -f scripts/stop_server.sh
+
+  build:
+    commands:
+      - echo "Validating Python files..."
+      - python3 -m compileall -q Backend
+      - echo "StyleSpectrum build completed!"
+
+  post_build:
+    commands:
+      - echo "Preparing deployment artifacts..."
+      - echo "Ready for CodeDeploy!"
+
+artifacts:
+  files:
+    - appspec.yml
+    - scripts/**/*
+    - Backend/**/*
+
+  exclude-paths:
+    - "Backend/.env"
+    - "Backend/**/.env"
+    - "Backend/venv/**/*"
+    - "Backend/**/venv/**/*"
+    - "Backend/__pycache__/**/*"
+    - "Backend/**/__pycache__/**/*"
+    - "Backend/uploads/**/*"
+
+  discard-paths: no
