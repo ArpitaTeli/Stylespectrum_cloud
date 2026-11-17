@@ -453,7 +453,7 @@
                 <img id="placeholder-image" src="/static/smile_please.png" alt="Say Cheese">
                 <span>Say Cheese!!</span>
             </div>
-            <video id="webcam-feed" autoplay style="display: none;"></video> 
+            <video id="webcam-feed" autoplay playsinline muted style="display: none;"></video>
         </div>
         <canvas id="canvas" style="display:none;"></canvas>
         <div class="controls">
@@ -612,6 +612,7 @@
     let capturedImageUrl = null;
     let allSuggestions = []; 
     let capturedFileName = 'capture.jpeg';
+    let cameraStream = null;
     const uploadBtn = document.getElementById('upload-btn');
     const uploadInput = document.getElementById('upload-input');
 
@@ -738,47 +739,69 @@
     }
 
 
-    // --- Webcam Control (Unchanged) ---
+    function stopCamera() {
+        const stream = cameraStream || video.srcObject;
+        if (stream) stream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+        video.srcObject = null;
+        video.style.display = 'none';
+        placeholderContent.style.display = 'flex';
+        startWebcamBtn.disabled = false;
+        captureBtn.disabled = true;
+    }
+
     startWebcamBtn.addEventListener('click', async () => {
+        if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+            showMessageBox('Camera access requires HTTPS and a browser that supports camera input.');
+            return;
+        }
+
+        startWebcamBtn.disabled = true;
+        captureBtn.disabled = true;
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { width: 600, height: 440 } 
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: { facingMode: 'user', width: { ideal: 600 }, height: { ideal: 440 } }
             });
-            video.srcObject = stream;
-            
+            video.srcObject = cameraStream;
             placeholderContent.style.display = 'none';
             video.style.display = 'block';
 
-            video.onloadedmetadata = () => {
-                video.play();
-                captureBtn.disabled = false;
-                startWebcamBtn.disabled = true;
-            };
+            await video.play();
+            if (!video.videoWidth) {
+                await new Promise(resolve => {
+                    video.addEventListener('loadedmetadata', resolve, { once: true });
+                });
+            }
+            captureBtn.disabled = false;
         } catch (err) {
-            const message = document.createElement('p');
-            message.className = 'text-red-500 mt-2';
-            message.textContent = 'Error accessing camera. Please ensure you have granted camera permissions.';
-            document.querySelector('.controls').appendChild(message);
+            stopCamera();
+            const messages = {
+                NotAllowedError: 'Camera permission was denied. Allow camera access in your browser settings, then try again.',
+                NotFoundError: 'No camera was found on this device.',
+                NotReadableError: 'The camera is already in use by another application.'
+            };
+            showMessageBox(messages[err.name] || 'Could not start the camera. Check browser permissions and try again.');
         }
     });
 
-    // --- Image Capture (Modified) ---
     captureBtn.addEventListener('click', () => {
+        if (!cameraStream || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA ||
+            !video.videoWidth || !video.videoHeight) {
+            showMessageBox('The camera is not ready yet. Please wait for the preview and try again.');
+            return;
+        }
+
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        if(video.srcObject) {
-            video.srcObject.getTracks().forEach(track => track.stop());
-        }
-        
-        video.style.display = 'none';
-        placeholderContent.style.display = 'flex';
-
-        startWebcamBtn.disabled = false;
-        captureBtn.disabled = true;
+        stopCamera();
         
         canvas.toBlob((blob) => {
+            if (!blob) {
+                showMessageBox('Could not process the captured image. Please try again.');
+                return;
+            }
             startAnalysisFromBlob(blob, 'capture.jpeg');
         }, 'image/jpeg', 0.9);
     });
@@ -834,14 +857,7 @@
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             URL.revokeObjectURL(url);
 
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(track => track.stop());
-                video.srcObject = null;
-                video.style.display = 'none';
-                placeholderContent.style.display = 'flex';
-                startWebcamBtn.disabled = false;
-                captureBtn.disabled = true;
-            }
+            if (cameraStream || video.srcObject) stopCamera();
             canvas.toBlob((blob) => {
                 if (!blob) { showMessageBox('Could not process that image.'); return; }
                 startAnalysisFromBlob(blob, 'upload.png');
@@ -982,16 +998,28 @@
                 suggestionItem.href = item.product_link || '#';
                 suggestionItem.target = '_blank'; 
                 
-                const img = document.createElement('img');
-                img.src = item.image_path; 
-                img.alt = item.style || 'Suggestion'; 
-                img.className = 'w-full h-auto rounded-md mb-1'; 
+                let suggestionImage = document.createElement('img');
+                suggestionImage.alt = item.style || 'Suggestion';
+                if (item.image_path) {
+                    suggestionImage.className = 'w-full h-auto rounded-md mb-1';
+                    suggestionImage.addEventListener('error', () => {
+                        const fallback = document.createElement('p');
+                        fallback.className = 'w-full py-8 text-sm text-center text-red-600';
+                        fallback.textContent = 'Image unavailable';
+                        suggestionImage.replaceWith(fallback);
+                    }, { once: true });
+                    suggestionImage.src = item.image_path;
+                } else {
+                    suggestionImage = document.createElement('p');
+                    suggestionImage.className = 'w-full py-8 text-sm text-center text-red-600';
+                    suggestionImage.textContent = 'Image unavailable';
+                }
 
                 const styleText = document.createElement('p');
                 styleText.className = 'text-xs font-medium text-gray-700 mt-1 truncate text-center';
                 styleText.textContent = `${item.style} (${gender}'s)`;
                 
-                suggestionItem.appendChild(img);
+                suggestionItem.appendChild(suggestionImage);
                 suggestionItem.appendChild(styleText);
                 suggestionsGrid.appendChild(suggestionItem);
             });
