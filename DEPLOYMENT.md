@@ -77,3 +77,44 @@ Region, S3 object prefix, and instance-profile permission.
 Elastic Beanstalk's public environment URL uses HTTPS, which also allows the
 browser camera feature. Review AWS charges and configure environment access
 and scaling to suit your use before sharing the URL publicly.
+
+## 5. Create the CodePipeline in the AWS console
+
+The pipeline connects the GitHub repository to your existing Elastic
+Beanstalk application and environment. It uses
+[buildspec-eb.yml](./buildspec-eb.yml) to validate and package each revision.
+No CloudFormation template is needed.
+
+Before creating it, commit and push `buildspec-eb.yml`, the root `Procfile`,
+the root `requirements.txt`, and the application files to the GitHub branch
+you want to deploy. Confirm the Elastic Beanstalk environment is healthy and
+that its S3 environment properties and instance-role permissions are set as
+described above.
+
+1. In AWS, open **CodePipeline** in the same Region as your Elastic Beanstalk
+   environment and choose **Create pipeline**. Choose **Build custom pipeline**.
+   Enter a pipeline name and let the wizard create a new service role and
+   artifact store.
+2. In **Source**, choose **GitHub (via GitHub App)**. Choose **Connect to
+   GitHub**, authorize/install the AWS Connector app for this repository, then
+   select `ArpitaTeli/Stylespectrum_cloud` and the branch to deploy (for
+   example, `main`). Enable push change detection so commits start the
+   pipeline automatically.
+3. Add a **Build** stage using **AWS CodeBuild**. Create a build project with
+   the CodePipeline source and output artifact types, a managed Linux image
+   (standard image 7.0 or later), and small compute. In the buildspec setting,
+   choose to use a buildspec file and enter `buildspec-eb.yml`. Let the wizard
+   create the CodeBuild service role, then save the project.
+4. Add a **Deploy** stage. Choose **AWS Elastic Beanstalk**, then select the
+   existing application and environment. Use the build action's output
+   artifact as the deploy input.
+5. Review the settings and create the pipeline. Allow the pipeline and
+   CodeBuild service roles to be created by the wizard. Watch the first
+   execution; if it does not start automatically, choose **Release change**.
+
+After a successful first run, pushes to the selected branch build and deploy
+automatically. CodeBuild logs show validation failures; the Elastic Beanstalk
+environment health and logs show deployment/runtime failures. Keep the
+environment's S3 settings and IAM instance permissions in place. Manual
+**Upload and deploy** remains available, but avoid using it while a pipeline
+execution is in progress.
