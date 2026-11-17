@@ -48,10 +48,7 @@ def get_image_url(s3_key):
     if not s3_key:
         return None
 
-    s3_key = str(s3_key).strip().replace("\\", "/").lstrip("/")
-
-    if not s3_key.startswith("stylespectrum_img/"):
-        s3_key = f"stylespectrum_img/{s3_key}"
+    s3_key = _normalize_image_key(s3_key)
 
     return s3_client.generate_presigned_url(
         "get_object",
@@ -61,6 +58,21 @@ def get_image_url(s3_key):
         },
         ExpiresIn=3600
     )
+
+
+def check_image_access(s3_key):
+    """Raise the AWS error if the configured credentials cannot read this image."""
+    s3_client.head_object(
+        Bucket=BUCKET_NAME,
+        Key=_normalize_image_key(s3_key)
+    )
+
+
+def _normalize_image_key(s3_key):
+    s3_key = str(s3_key).strip().replace("\\", "/").lstrip("/")
+    if not s3_key.startswith("stylespectrum_img/"):
+        s3_key = f"stylespectrum_img/{s3_key}"
+    return s3_key
 
 
 if __name__ == "__main__":

@@ -74,6 +74,17 @@ If health returns 503, inspect the response's `problems` field and the
 environment logs. If suggestion images do not load, verify the bucket name,
 Region, S3 object prefix, and instance-profile permission.
 
+To check whether the instance can read an S3 image, open
+`/api/health?check_s3=1`. The `s3_check` result tests
+`stylespectrum_img/burn3.png` without exposing a presigned URL:
+
+- `AccessDenied` or `403`: attach an instance profile with `s3:GetObject` on
+  the bucket's `stylespectrum_img/*` objects.
+- `NoSuchKey` or `404`: confirm the object exists with the exact key and
+  capitalization shown in `s3_check.key`.
+- A credential or endpoint error: confirm the Elastic Beanstalk instance role
+  is attached and `AWS_REGION` is set to the bucket's Region.
+
 Elastic Beanstalk's public environment URL uses HTTPS, which also allows the
 browser camera feature. Review AWS charges and configure environment access
 and scaling to suit your use before sharing the URL publicly.

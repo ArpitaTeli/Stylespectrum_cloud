@@ -1,9 +1,9 @@
 import os
 import sys
 from flask import Flask, request, jsonify, render_template
-from s3_utils import get_image_url
+from s3_utils import check_image_access, get_image_url
 from werkzeug.utils import secure_filename
-from botocore.exceptions import ClientError
+from botocore.exceptions import BotoCoreError, ClientError
 
 # Resolve paths relative to this file.
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -134,6 +134,27 @@ def index():
 def health():
     """Check local app/data setup at http://localhost:5000/api/health."""
     problems = startup_report()
+    s3_check = {"checked": False}
+
+    if request.args.get("check_s3") == "1":
+        test_key = "stylespectrum_img/burn3.png"
+        try:
+            check_image_access(test_key)
+            s3_check = {"checked": True, "ok": True, "key": test_key}
+        except ClientError as e:
+            s3_check = {
+                "checked": True,
+                "ok": False,
+                "key": test_key,
+                "error_code": e.response.get("Error", {}).get("Code", "ClientError"),
+            }
+        except BotoCoreError as e:
+            s3_check = {
+                "checked": True,
+                "ok": False,
+                "key": test_key,
+                "error_code": type(e).__name__,
+            }
 
     return jsonify({
         "ok": not problems,
@@ -149,6 +170,7 @@ def health():
         "s3_bucket": os.getenv("S3_BUCKET_NAME", "stylespectrum"),
         "s3_region": os.getenv("AWS_REGION", "ap-south-2"),
         "s3_prefix": "stylespectrum_img/",
+        "s3_check": s3_check,
     }), (200 if not problems else 503)
 
 
