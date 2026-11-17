@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
  
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATASET_DIR = os.path.join(BASE_DIR, "datasets")
+DATASET_DIR = os.path.join(BASE_DIR, "Datasets")
  
  
 def _clean(value):
@@ -63,7 +63,7 @@ def load_datasets():
             
         return palette_data, suggestions
     except FileNotFoundError as e:
-        print(f"Error: {e}. Please ensure 'datasets/color_palate_ds.xlsx' and 'datasets/suggestions.xlsx' exist.")
+        print(f"Error: {e}. Please ensure 'Datasets/color_palate_ds.xlsx' and 'Datasets/suggestions.xlsx' exist.")
         return None, None
     except ImportError as e:
         print(f"Error: {e}. Reading .xlsx needs openpyxl: pip install openpyxl")

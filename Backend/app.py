@@ -110,8 +110,8 @@ def startup_report():
         model, "suggestions", None
     ) is None:
         problems.append(
-            "Datasets not loaded; check datasets/color_palate_ds.xlsx "
-            "and datasets/suggestions.xlsx"
+            "Datasets not loaded; check Datasets/color_palate_ds.xlsx "
+            "and Datasets/suggestions.xlsx"
         )
 
     if not os.path.exists(os.path.join(BASE_DIR, "templates", "index.html")):
@@ -149,7 +149,7 @@ def health():
         "s3_bucket": os.getenv("S3_BUCKET_NAME", "stylespectrum"),
         "s3_region": os.getenv("AWS_REGION", "ap-south-2"),
         "s3_prefix": "stylespectrum_img/",
-    })
+    }), (200 if not problems else 503)
 
 
 @app.route("/api/analyze_image", methods=["POST"])
@@ -237,4 +237,4 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 5000))
     # Camera access works on localhost or HTTPS.
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=False)

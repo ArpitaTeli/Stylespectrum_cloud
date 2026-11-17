@@ -3,6 +3,8 @@ Flask
 numpy
 pandas
 scikit-learn
-opencv-python
+opencv-python-headless
 openpyxl
 boto3
+python-dotenv
+gunicorn

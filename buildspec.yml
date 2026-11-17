@@ -4,10 +4,12 @@ version: 0.2
 phases:
 
   install:
+    runtime-versions:
+      python: 3.11
     commands:
-      - echo "Checking Python version..."
       - python3 --version
-      - echo "Checking project structure..."
+      - python3 -m pip install --upgrade pip
+      - python3 -m pip install -r Backend/requirements.txt
 
   pre_build:
     commands:
@@ -19,11 +21,15 @@ phases:
       - test -f scripts/install_dependencies.sh
       - test -f scripts/start_server.sh
       - test -f scripts/stop_server.sh
+      - test -f Backend/Datasets/color_palate_ds.xlsx
+      - test -f Backend/Datasets/suggestions.xlsx
+      - chmod +x scripts/*.sh
 
   build:
     commands:
       - echo "Validating Python files..."
       - python3 -m compileall -q Backend
+      - PYTHONPATH=Backend python3 -c "import model; assert model.palette_data is not None and model.suggestions is not None"
       - echo "StyleSpectrum build completed!"
 
   post_build:
