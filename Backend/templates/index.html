@@ -476,6 +476,362 @@
             width: 1em;
             margin-left: -1em;
         }
+
+        :root {
+            color-scheme: light;
+            --ink: #292438;
+            --muted: #716b7d;
+            --plum: #672a75;
+            --plum-dark: #401d50;
+            --rose: #d98ba7;
+            --surface: #ffffff;
+            --line: #eee6f0;
+            --shadow: 0 18px 50px rgba(50, 25, 62, 0.12);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            align-items: stretch;
+            justify-content: flex-start;
+            padding: clamp(14px, 3vw, 36px);
+            color: var(--ink);
+            background:
+                radial-gradient(ellipse at 10% 5%, rgba(245, 208, 221, 0.9), transparent 38%),
+                radial-gradient(ellipse at 95% 20%, rgba(221, 203, 238, 0.8), transparent 35%),
+                linear-gradient(145deg, #f8f5fb, #fff8f4 55%, #f5eff9);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .container {
+            width: min(100%, 980px);
+            max-width: 980px;
+            margin: 0 auto;
+            padding: clamp(18px, 4vw, 38px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(14px);
+        }
+
+        .header-banner {
+            margin-bottom: 28px;
+            padding: clamp(24px, 5vw, 42px) 20px;
+            border: 0;
+            border-radius: 22px;
+            background: linear-gradient(130deg, var(--plum-dark), #7a3d83 58%, #b66c8d);
+            box-shadow: 0 12px 28px rgba(80, 36, 91, 0.2);
+        }
+
+        .header-banner h1 {
+            margin: 0 0 8px;
+            color: #fff;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            letter-spacing: -0.04em;
+        }
+
+        .header-banner p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.82);
+            font-family: inherit;
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+        }
+
+        h2, h3 {
+            color: var(--plum-dark);
+            letter-spacing: -0.025em;
+        }
+
+        .video-container, .result-container {
+            margin-top: 28px;
+        }
+
+        #webcam-feed-wrapper {
+            width: min(100%, 640px);
+            height: auto;
+            aspect-ratio: 4 / 3;
+            border: 1px solid rgba(103, 42, 117, 0.18);
+            border-radius: 22px;
+            background: linear-gradient(145deg, #f1e8f4, #eadce9);
+            box-shadow: 0 12px 30px rgba(53, 33, 65, 0.12);
+        }
+
+        #webcam-feed, #placeholder-image {
+            border-radius: 20px;
+        }
+
+        #placeholder-content {
+            color: var(--plum-dark);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            text-shadow: none;
+        }
+
+        #placeholder-image {
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 24px rgba(64, 29, 80, 0.16);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .controls button, #launch-try-on {
+            min-height: 46px;
+            margin: 0;
+            padding: 11px 20px;
+            border: 1px solid transparent;
+            border-radius: 13px;
+            background: var(--plum-dark);
+            color: #fff;
+            font: inherit;
+            font-weight: 650;
+            box-shadow: 0 5px 14px rgba(64, 29, 80, 0.15);
+            transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+        }
+
+        .controls button:hover:not(:disabled), #launch-try-on:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: var(--plum);
+            box-shadow: 0 8px 18px rgba(64, 29, 80, 0.2);
+        }
+
+        .controls button:disabled, #launch-try-on:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .controls button#show-men-btn, .controls button#show-women-btn {
+            border-color: #e8d8ec;
+            background: #f7eff8;
+            color: var(--plum-dark);
+            box-shadow: none;
+        }
+
+        .controls button#show-men-btn:hover, .controls button#show-women-btn:hover {
+            background: #efe1f1;
+        }
+
+        button:focus-visible, a:focus-visible, .swatch:focus-visible, .wheel-swatch:focus-visible {
+            outline: 3px solid #bd7194;
+            outline-offset: 3px;
+        }
+
+        #circular-palette-wrapper {
+            width: min(300px, 72vw);
+            height: min(300px, 72vw);
+            background: #fbf8fc;
+            box-shadow: 0 0 0 8px rgba(232, 215, 238, 0.8), 0 14px 30px rgba(64, 29, 80, 0.12);
+        }
+
+        #palette-center {
+            background: linear-gradient(145deg, #f8e9f1, #eadcf0);
+            box-shadow: 0 6px 18px rgba(64, 29, 80, 0.14);
+        }
+
+        #center-season-name {
+            color: var(--plum-dark);
+        }
+
+        #palette-highlight-box {
+            border-radius: 10px;
+            background: var(--plum-dark);
+            box-shadow: 0 6px 16px rgba(37, 19, 44, 0.2);
+        }
+
+        #colors-avoid-box {
+            max-width: 800px;
+            border: 1px solid #f0d7e2;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #fff5f7, #fffafd);
+            color: var(--ink);
+            box-shadow: 0 8px 24px rgba(91, 49, 77, 0.08);
+        }
+
+        #colors-avoid-box h3 {
+            border-bottom: 1px solid #edd8e3;
+            color: var(--plum-dark);
+        }
+
+        .avoid-grid {
+            grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+            gap: 12px 8px;
+        }
+
+        .avoid-swatch {
+            border: 2px solid #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(41, 36, 56, 0.16);
+        }
+
+        .avoid-swatch-name {
+            color: var(--muted);
+        }
+
+        .modal {
+            padding: 20px;
+            background: rgba(31, 22, 38, 0.62);
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-content {
+            width: min(100%, 1100px);
+            max-height: 92vh;
+            overflow: auto;
+            margin: 2vh auto;
+            padding: clamp(20px, 4vw, 36px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 24px;
+            background: #fff;
+            color: var(--ink);
+            box-shadow: 0 24px 70px rgba(24, 14, 30, 0.28);
+        }
+
+        .close-btn {
+            top: 14px;
+            right: 18px;
+            display: grid;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--muted);
+            background: #f5f1f7;
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        .close-btn:hover, .close-btn:focus {
+            color: var(--plum-dark);
+            background: #eee4f1;
+        }
+
+        #tryon-face-section {
+            background: #fbf8fc;
+            box-shadow: 0 8px 24px rgba(64, 29, 80, 0.08);
+        }
+
+        #face-crop-wrapper {
+            width: min(340px, 78vw);
+            height: min(340px, 78vw);
+            box-shadow: 0 10px 28px rgba(64, 29, 80, 0.18);
+        }
+
+        .all-palette-grid {
+            margin-top: 16px;
+            padding-right: 4px;
+        }
+
+        .season-group {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fbf9fc;
+            box-shadow: 0 5px 16px rgba(41, 36, 56, 0.06);
+        }
+
+        .color-row {
+            grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+            gap: 14px 10px;
+        }
+
+        .swatch {
+            border: 3px solid #fff;
+            box-shadow: 0 2px 8px rgba(41, 36, 56, 0.16);
+        }
+
+        .swatch:hover {
+            border-color: #fff;
+            box-shadow: 0 0 0 3px rgba(189, 113, 148, 0.5), 0 5px 12px rgba(41, 36, 56, 0.18);
+        }
+
+        .suggestion-item {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 16px !important;
+            box-shadow: 0 6px 18px rgba(41, 36, 56, 0.08) !important;
+        }
+
+        #seasons-in-style {
+            margin-top: 44px;
+            padding-top: 28px;
+            border-top: 1px solid var(--line);
+        }
+
+        .seasons-grid {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+            gap: 16px;
+        }
+
+        .season-card {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: linear-gradient(145deg, #fff, #fcf8fd);
+            box-shadow: 0 8px 22px rgba(41, 36, 56, 0.07);
+        }
+
+        .season-card h4 {
+            color: var(--plum-dark);
+        }
+
+        .season-card p.subtitle {
+            color: #98618f;
+        }
+
+        .season-card img {
+            border: 4px solid #fff;
+            box-shadow: 0 4px 14px rgba(64, 29, 80, 0.16);
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 16px;
+                border-radius: 22px;
+            }
+
+            .header-banner {
+                border-radius: 17px;
+            }
+
+            .controls button, #launch-try-on {
+                flex: 1 1 145px;
+                padding-inline: 12px;
+            }
+
+            .modal {
+                padding: 10px;
+            }
+
+            .modal-content {
+                max-height: 96vh;
+                margin: 2vh auto;
+                border-radius: 18px;
+            }
+
+            .season-card {
+                padding: 16px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
     </style>
 </head>
 <body>
