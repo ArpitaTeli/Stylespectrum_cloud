@@ -142,25 +142,39 @@ def _white_balance(bgr, skin):
     return np.clip(bgr.astype(np.float32) * gains, 0, 255).astype(np.uint8)
  
  
-_FACE_CASCADE = None
+_FACE_CASCADES = None
  
  
 def _detect_face(bgr):
-    """Returns the largest frontal face as (x, y, w, h), or None."""
-    global _FACE_CASCADE
+    """Returns the largest detected frontal face as (x, y, w, h), or None."""
+    global _FACE_CASCADES
     try:
-        if _FACE_CASCADE is None:
-            _FACE_CASCADE = cv2.CascadeClassifier(
-                cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-        if _FACE_CASCADE.empty():
+        if _FACE_CASCADES is None:
+            cascade_files = (
+                "haarcascade_frontalface_default.xml",
+                "haarcascade_frontalface_alt2.xml",
+            )
+            _FACE_CASCADES = [
+                cv2.CascadeClassifier(cv2.data.haarcascades + filename)
+                for filename in cascade_files
+            ]
+        cascades = [cascade for cascade in _FACE_CASCADES if not cascade.empty()]
+        if not cascades:
             return None
-        gray = cv2.equalizeHist(cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY))
-        min_size = max(60, int(min(gray.shape) * 0.15))
-        faces = _FACE_CASCADE.detectMultiScale(
-            gray, scaleFactor=1.1, minNeighbors=5, minSize=(min_size, min_size))
-        if len(faces) == 0:
-            return None
-        return tuple(int(v) for v in max(faces, key=lambda f: f[2] * f[3]))
+        gray = cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY)
+        detection_images = (cv2.equalizeHist(gray), gray)
+        min_size = max(40, int(min(gray.shape) * 0.10))
+        for cascade in cascades:
+            for detection_image in detection_images:
+                faces = cascade.detectMultiScale(
+                    detection_image,
+                    scaleFactor=1.1,
+                    minNeighbors=5,
+                    minSize=(min_size, min_size),
+                )
+                if len(faces):
+                    return tuple(int(v) for v in max(faces, key=lambda f: f[2] * f[3]))
+        return None
     except Exception:
         return None
  
